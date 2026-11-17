@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "E3Health · Your everyday stock companion",
-  description: "Simple stock management, clear pricing, and a beautiful product catalog.",
+  title: "E3Health · Health & beauty",
+  description: "Browse health and beauty essentials from E3Health.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
