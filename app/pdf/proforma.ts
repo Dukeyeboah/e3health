@@ -1,0 +1,42 @@
+import {PDFDocument,rgb,type PDFPage} from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
+import {fontBase64,boldFontBase64} from './font';
+export type OrderLine={id:string;name:string;quantity:number;unitPrice:number;lineTotal:number;sample:boolean};
+export type Proforma={reference:string;issuedAt:string;lines:OrderLine[];total:number};
+export async function createProforma(order:Proforma){
+ const doc=await PDFDocument.create();doc.registerFontkit(fontkit);
+ const font=await doc.embedFont(Uint8Array.from(atob(fontBase64),c=>c.charCodeAt(0)),{subset:true});
+ const bold=await doc.embedFont(Uint8Array.from(atob(boldFontBase64),c=>c.charCodeAt(0)),{subset:true});
+ doc.setTitle('E3Health Pro Forma '+order.reference);doc.setAuthor('E3Health');doc.setSubject('Itemized order in Ghana cedis');doc.setCreationDate(new Date(order.issuedAt));
+ const green=rgb(.17,.38,.30),ink=rgb(.16,.24,.20),muted=rgb(.45,.51,.43),line=rgb(.88,.91,.86),pale=rgb(.94,.96,.91);
+ const supported=new Set(font.getCharacterSet());
+ const clean=(s:string)=>Array.from(s.replace(/[\r\n\t]/g,' ')).map(c=>supported.has(c.codePointAt(0)!)?c:'?').join('');
+ const money=(n:number)=>'GH₵ '+n.toLocaleString('en-GH',{minimumFractionDigits:2,maximumFractionDigits:2});
+ const draw=(p:PDFPage,s:string,x:number,y:number,size=10,color=ink)=>p.drawText(clean(s),{x,y,size,font,color});
+ const right=(p:PDFPage,s:string,x:number,y:number,size=10,color=ink)=>draw(p,s,x-font.widthOfTextAtSize(clean(s),size),y,size,color);
+ const wrap=(s:string,width:number,size:number)=>{const out:string[]=[];let row='';for(const char of clean(s)){if(font.widthOfTextAtSize(row+char,size)>width&&row){const space=row.lastIndexOf(' ');if(space>0){out.push(row.slice(0,space));row=row.slice(space+1)+char}else{out.push(row);row=char}}else row+=char}if(row)out.push(row);return out};
+ let page!:PDFPage;let y=0;
+ const newPage=()=>{page=doc.addPage([595.28,841.89]);
+  const paths=['M24 26C8 24 7 7 15 5c9-2 15 12 9 21Z','M24 26C29 11 44 14 44 23c0 9-14 14-20 3Z','M24 26C35 37 24 48 16 43c-8-5-6-19 8-17Z'];
+  paths.forEach((path,i)=>page.drawSvgPath(path,{x:41,y:797,scale:.8,color:[green,rgb(.54,.67,.47),rgb(.71,.77,.64)][i]}));
+  page.drawText('e3health',{x:86,y:773,size:26,font:bold,color:green});
+  right(page,'WhatsApp +233 24 344 0226',550,781,9,muted);
+  page.drawLine({start:{x:45,y:746},end:{x:550,y:746},thickness:1,color:line});
+  page.drawText('PRO FORMA INVOICE',{x:45,y:710,size:21,font:bold,color:ink});
+  draw(page,'Order summary · All amounts in Ghana cedis (GHS)',45,688,9,muted);
+  draw(page,'Reference',45,660,8,muted);draw(page,order.reference,45,644,10);
+  draw(page,'Issued',350,660,8,muted);draw(page,new Date(order.issuedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'Africa/Accra'}),350,644,10);
+  page.drawRectangle({x:45,y:600,width:505,height:29,color:pale});
+  draw(page,'PRODUCT',57,610,8,muted);right(page,'QTY',329,610,8,muted);right(page,'UNIT PRICE',435,610,8,muted);right(page,'LINE TOTAL',538,610,8,muted);y=587;
+ };
+ newPage();
+ for(const item of order.lines){const rows=wrap(item.name,232,10);const height=Math.max(36,rows.length*15+19);if(y-height<100)newPage();rows.forEach((s,i)=>draw(page,s,57,y-i*15,10));right(page,String(item.quantity),329,y,10);right(page,money(item.unitPrice),435,y,9);right(page,money(item.lineTotal),538,y,9);page.drawLine({start:{x:45,y:y-height+13},end:{x:550,y:y-height+13},thickness:.6,color:line});y-=height;}
+ if(y<185)newPage();
+ page!.drawRectangle({x:318,y:y-52,width:232,height:51,color:pale});draw(page!,'TOTAL',333,y-31,10,green);right(page!,money(order.total),535,y-32,17,green);
+ let noteY=y-82;
+ const notes=['Availability and delivery charges will be confirmed by E3Health.','This pro forma is an order estimate, not a payment receipt.'];
+ if(order.lines.some(p=>p.sample))notes.push('Sample products: prices and quantities are for demonstration.');
+ notes.forEach(note=>{wrap(note,500,8).forEach(s=>{draw(page!,s,45,noteY,8,muted);noteY-=13})});
+ const pages=doc.getPages();pages.forEach((p,i)=>{p.drawLine({start:{x:45,y:62},end:{x:550,y:62},thickness:.7,color:line});draw(p,'E3Health · Health & beauty',45,45,8,muted);right(p,`${i+1} / ${pages.length}`,550,45,8,muted)});
+ return doc.save();
+}
