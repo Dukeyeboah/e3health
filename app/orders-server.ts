@@ -1,0 +1,5 @@
+import {orders} from '../db/schema';
+import type {OrderData,SavedOrder} from './order-types';
+export function serializeOrder(row:typeof orders.$inferSelect):SavedOrder{return {...JSON.parse(row.data) as OrderData,id:row.id,number:'E3-'+String(row.sequence).padStart(6,'0'),createdAt:row.createdAt,updatedAt:row.updatedAt,status:row.status as SavedOrder['status'],revision:row.revision};}
+export function orderMessage(o:SavedOrder,pdfUrl?:string){const money=(n:number)=>'GH₵ '+n.toFixed(2);return [`*E3Health — ${pdfUrl?'Pro forma':'Order request'} ${o.number}*`,o.customerName?'Customer: '+o.customerName:'',...o.lines.map((p,i)=>`${i+1}. ${p.name}\n${p.quantity} × ${money(p.unitPrice)} = ${money(p.lineTotal)}`),`*Total: ${money(o.total)}*`,pdfUrl?'Pro forma PDF: '+pdfUrl:'Please confirm availability and delivery.',o.lines.some(p=>p.sample)?'Includes sample products and illustrative prices.':''].filter(Boolean).join('\n\n');}
+export const whatsapp=(message:string)=>'https://wa.me/233243440226?text='+encodeURIComponent(message);

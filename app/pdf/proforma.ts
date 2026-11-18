@@ -2,7 +2,7 @@ import {PDFDocument,rgb,type PDFPage} from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import {fontBase64,boldFontBase64} from './font';
 export type OrderLine={id:string;name:string;quantity:number;unitPrice:number;lineTotal:number;sample:boolean};
-export type Proforma={reference:string;issuedAt:string;lines:OrderLine[];total:number};
+export type Proforma={reference:string;issuedAt:string;customerName?:string;lines:OrderLine[];total:number};
 export async function createProforma(order:Proforma){
  const doc=await PDFDocument.create();doc.registerFontkit(fontkit);
  const font=await doc.embedFont(Uint8Array.from(atob(fontBase64),c=>c.charCodeAt(0)),{subset:true});
@@ -26,8 +26,10 @@ export async function createProforma(order:Proforma){
   draw(page,'Order summary · All amounts in Ghana cedis (GHS)',45,688,9,muted);
   draw(page,'Reference',45,660,8,muted);draw(page,order.reference,45,644,10);
   draw(page,'Issued',350,660,8,muted);draw(page,new Date(order.issuedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'Africa/Accra'}),350,644,10);
-  page.drawRectangle({x:45,y:600,width:505,height:29,color:pale});
-  draw(page,'PRODUCT',57,610,8,muted);right(page,'QTY',329,610,8,muted);right(page,'UNIT PRICE',435,610,8,muted);right(page,'LINE TOTAL',538,610,8,muted);y=587;
+  const customerRows=order.customerName?wrap('Prepared for: '+order.customerName,505,9):[];customerRows.forEach((s,i)=>draw(page,s,45,620-i*13,9));
+  const tableY=customerRows.length?580-(customerRows.length-1)*13:600;
+  page.drawRectangle({x:45,y:tableY,width:505,height:29,color:pale});
+  draw(page,'PRODUCT',57,tableY+10,8,muted);right(page,'QTY',329,tableY+10,8,muted);right(page,'UNIT PRICE',435,tableY+10,8,muted);right(page,'LINE TOTAL',538,tableY+10,8,muted);y=tableY-13;
  };
  newPage();
  for(const item of order.lines){const rows=wrap(item.name,232,10);const height=Math.max(36,rows.length*15+19);if(y-height<100)newPage();rows.forEach((s,i)=>draw(page,s,57,y-i*15,10));right(page,String(item.quantity),329,y,10);right(page,money(item.unitPrice),435,y,9);right(page,money(item.lineTotal),538,y,9);page.drawLine({start:{x:45,y:y-height+13},end:{x:550,y:y-height+13},thickness:.6,color:line});y-=height;}

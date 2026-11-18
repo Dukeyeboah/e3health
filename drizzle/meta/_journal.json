@@ -15,6 +15,13 @@
       "when": 1794956749241,
       "tag": "0001_majestic_slipstream",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794960527093,
+      "tag": "0002_living_fat_cobra",
+      "breakpoints": true
     }
   ]
 }
