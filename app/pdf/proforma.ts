@@ -20,7 +20,7 @@ export async function createProforma(order:Proforma){
   const paths=['M24 26C8 24 7 7 15 5c9-2 15 12 9 21Z','M24 26C29 11 44 14 44 23c0 9-14 14-20 3Z','M24 26C35 37 24 48 16 43c-8-5-6-19 8-17Z'];
   paths.forEach((path,i)=>page.drawSvgPath(path,{x:41,y:797,scale:.8,color:[green,rgb(.54,.67,.47),rgb(.71,.77,.64)][i]}));
   page.drawText('e3health',{x:86,y:773,size:26,font:bold,color:green});
-  right(page,'WhatsApp +233 24 344 0226',550,781,9,muted);
+  right(page,'WhatsApp +1 484 467 4166',550,781,9,muted);
   page.drawLine({start:{x:45,y:746},end:{x:550,y:746},thickness:1,color:line});
   page.drawText('PRO FORMA INVOICE',{x:45,y:710,size:21,font:bold,color:ink});
   draw(page,'Order summary · All amounts in Ghana cedis (GHS)',45,688,9,muted);

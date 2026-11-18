@@ -1,6 +1,25 @@
-# vinext-starter
+# E3Health
 
-A clean full-stack starter running on [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and Drizzle support.
+A mobile-friendly product catalog and stock manager for E3Health, built with React/Vinext, Cloudflare D1 and R2.
+
+Customers browse products and submit orders to WhatsApp **+1 484 467 4166**. The signed-in store admin manages products, order history and branded pro forma PDFs. Prices are in Ghana cedis.
+
+## Order stock behavior
+
+- Completing an order deducts its quantities once, atomically with the status change.
+- Reopening, cancelling or deleting a completed order restores its quantities once.
+- Insufficient stock blocks completion without partially changing any product.
+- Products removed from the catalog retain their stored inventory row so reversals remain possible.
+- Orders completed before stock tracking was introduced are not deducted retroactively and do not receive a stock credit on reopening. Reopen and complete them to begin tracking.
+- Order submission saves the order before opening WhatsApp; the customer must tap Send there.
+
+Runtime secrets and live product/order data are not included in this repository. Configure `E3_ADMIN_EMAIL` in the hosting environment; for the local mock sign-in only, use `E3_ADMIN_EMAIL=seedy@sites.test` in ignored `.dev.vars`.
+
+## Stock integration check
+
+With the local preview running and all migrations applied, run `python3 tests/order-stock.py`. This creates disposable test products and orders in the local database and checks deductions, reversals, duplicate requests, concurrent completions and insufficient-stock rollback.
+
+## Framework and hosting setup
 
 ## Prerequisites
 
