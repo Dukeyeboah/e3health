@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "npm run build:vercel",
+  "outputDirectory": "vercel-dist",
+  "redirects": [
+    { "source": "/signin-with-chatgpt", "destination": "https://e3health-stock-studio.psilocyber-9989.chatgpt.site/signin-with-chatgpt?return_to=/", "permanent": false },
+    { "source": "/signout-with-chatgpt", "destination": "https://e3health-stock-studio.psilocyber-9989.chatgpt.site/signout-with-chatgpt?return_to=/", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/api/:endpoint*", "destination": "/api/bridge?endpoint=:endpoint*" }
+  ]
+}

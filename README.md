@@ -4,6 +4,16 @@ A mobile-friendly product catalog and stock manager for E3Health, built with Rea
 
 Customers browse products and submit orders to WhatsApp **+1 484 467 4166**. The signed-in store admin manages products, order history and branded pro forma PDFs. Prices are in Ghana cedis.
 
+## Deploying the customer storefront on Vercel
+
+Import this repository with root directory `.`. The checked-in `vercel.json` selects **Other** (not Next.js), runs `npm run build:vercel`, and serves `vercel-dist`. Use Node.js 22.x. Clear any dashboard overrides that still force Next.js or `.next`, then deploy the latest `main` commit.
+
+This is a split deployment: Vercel serves the customer interface; the existing E3Health Sites backend continues to own products, orders, stock, photos and PDFs. No new database credentials are needed on Vercel. Keep the existing Sites deployment public and running.
+
+The public bridge accepts only catalog reads, order submissions and public file downloads. It does not forward authentication cookies or identity headers. **Admin sign in opens the original E3Health site**, where product editing, order management and pro formas remain available. An admin signed in on Sites is still a customer on the Vercel storefront. The order message still sends to +1 484 467 4166.
+
+`npm run build` remains the Cloudflare/Sites build; `npm run build:vercel` builds only the storefront. Future Firebase migration can replace the public bridge and the current authentication/storage layers.
+
 ## Order stock behavior
 
 - Completing an order deducts its quantities once, atomically with the status change.
