@@ -4,15 +4,15 @@ A mobile-friendly product catalog and stock manager for E3Health, built with Rea
 
 Customers browse products and submit orders to WhatsApp **+1 484 467 4166**. The signed-in store admin manages products, order history and branded pro forma PDFs. Prices are in Ghana cedis.
 
-## Deploying the customer storefront on Vercel
+## Vercel interactive demo
 
-Import this repository with root directory `.`. The checked-in `vercel.json` selects **Other** (not Next.js), runs `npm run build:vercel`, and serves `vercel-dist`. Use Node.js 22.x. Clear any dashboard overrides that still force Next.js or `.next`, then deploy the latest `main` commit.
+The Vercel build is an interactive demo with Admin view and Customer view on the same domain. Products, uploaded photos and orders are saved in **IndexedDB in the current browser**. Both views share this local demo inventory. It starts with 24 sample products and two example orders. No admin sign-in is needed for this isolated demo, and no demo changes reach the live Sites backend.
 
-This is a split deployment: Vercel serves the customer interface; the existing E3Health Sites backend continues to own products, orders, stock, photos and PDFs. No new database credentials are needed on Vercel. Keep the existing Sites deployment public and running.
+Add photos from the laptop/phone library; touch devices also show a Take photo control for the mobile camera. The browser may request camera permission. Demo checkout saves a local order without sending WhatsApp messages. Admins can edit orders, deduct/restore stock and download branded demo pro forma PDFs.
 
-The public bridge accepts only catalog reads, order submissions and public file downloads. It does not forward authentication cookies or identity headers. **Admin sign in opens the original E3Health site**, where product editing, order management and pro formas remain available. An admin signed in on Sites is still a customer on the Vercel storefront. The order message still sends to +1 484 467 4166.
+This is device-local storage, not cloud synchronization: opening the link on another browser or device starts a separate demo. Clearing site data removes saved photos and edits. Private browsing may not retain data. Existing live inventory and orders remain on the original Sites host.
 
-`npm run build` remains the Cloudflare/Sites build; `npm run build:vercel` builds only the storefront. Future Firebase migration can replace the public bridge and the current authentication/storage layers.
+Import this repository with root directory `.`. `vercel.json` selects **Other**, runs `npm run build:vercel`, and serves `vercel-dist` with Node.js 22.x. `npm run build` remains the authenticated Cloudflare/Sites build. The public backend bridge is retained for a future connected-store configuration; the demo does not use it.
 
 ## Order stock behavior
 
